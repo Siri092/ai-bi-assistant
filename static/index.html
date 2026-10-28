@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mini AI BI Assistant</title>
+<style>
+:root{font-family:Inter,system-ui,Arial,sans-serif;color:#172033;background:#f4f6fb}
+body{margin:0}.wrap{max-width:900px;margin:40px auto;padding:0 18px}
+header{background:#172b4d;color:white;padding:26px;border-radius:18px}
+header h1{margin:0 0 8px;font-size:28px}header p{margin:0;color:#dbe6ff}
+.panel{background:white;border:1px solid #e1e6ef;border-radius:16px;padding:22px;margin-top:18px;box-shadow:0 6px 24px #172b4d0a}
+label{font-weight:650;display:block;margin-bottom:10px}
+textarea{width:100%;box-sizing:border-box;border:1px solid #cbd3e1;border-radius:10px;padding:13px;font:inherit;min-height:85px}
+button{border:0;border-radius:10px;padding:12px 18px;background:#2459d3;color:white;font-weight:700;cursor:pointer;margin-top:10px}
+button:hover{background:#1746b2}.examples{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.examples button{margin:0;background:#edf2ff;color:#2146a0;font-size:13px;padding:9px 11px}
+#status{color:#596579;margin-top:12px}.answer{font-size:20px;font-weight:700;line-height:1.5}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f6f8fc;padding:14px;border-radius:10px}
+small{color:#647087}.error{color:#b42318}
+</style>
+</head>
+<body><main class="wrap">
+<header><h1>AI Business Intelligence Assistant</h1><p>Ask questions about sales. Answers are calculated from the SQLite database.</p></header>
+<section class="panel">
+<label for="question">Your question</label>
+<textarea id="question" placeholder="e.g. Which product generated the highest revenue?"></textarea>
+<button id="ask">Ask question</button>
+<div class="examples">
+<button data-q="What is the total revenue?">Total revenue</button>
+<button data-q="Which product generated the highest revenue?">Top product</button>
+<button data-q="What is the monthly revenue trend?">Monthly trend</button>
+<button data-q="Which region generated the highest sales?">Top region</button>
+<button data-q="Compare revenue between 2026-01 and 2026-02">Compare months</button>
+</div><div id="status"></div>
+</section>
+<section id="result" class="panel" hidden><h2>Answer</h2><div class="answer" id="answer"></div><h3>Supporting data</h3><pre id="data"></pre><small id="method"></small></section>
+</main>
+<script>
+const q=document.getElementById('question'), status=document.getElementById('status');
+document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{q.value=b.dataset.q;});
+document.getElementById('ask').onclick=async()=>{
+ const question=q.value.trim(); if(question.length<3){status.textContent='Please enter a question with at least 3 characters.';return;}
+ status.textContent='Calculating...'; status.className=''; 
+ try{
+  const r=await fetch('/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question})});
+  const body=await r.json(); if(!r.ok)throw new Error(body.detail||'Request failed');
+  document.getElementById('result').hidden=false;
+  document.getElementById('answer').textContent=body.answer;
+  document.getElementById('data').textContent=JSON.stringify(body.data,null,2);
+  document.getElementById('method').textContent='Question interpretation: '+body.interpretation_method+'; intent: '+body.intent;
+  status.textContent='Done.';
+ }catch(e){status.textContent=e.message;status.className='error';}
+};
+q.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter')document.getElementById('ask').click();});
+</script></body></html>
