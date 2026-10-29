@@ -2,58 +2,145 @@
 
 ## 1. Project Overview
 
-The AI Business Intelligence Assistant answers natural-language questions about sales data. It uses Python, FastAPI, SQLite, and a web-based interface to return calculated results from the sales database.
+The Mini AI Business Intelligence Assistant answers natural-language questions about sales data. It uses Python, FastAPI, SQLite, SQL, and a browser-based interface to return answers calculated from the sales database.
 
-## 2. AI Tools and Techniques
+The purpose of the project is to demonstrate the development of a small business analytics application that combines question interpretation with deterministic database queries.
 
-An AI-assisted development approach was used to help design the application structure, implement features, debug errors, and create automated tests.
+## 2. AI Tools Used
 
-The application uses a local intent interpreter to identify supported question types. It also includes optional OpenAI integration for interpreting questions when an API key is configured.
+ChatGPT was used as an AI-assisted development tool for guidance, code explanations, debugging assistance, and documentation preparation.
 
-## 3. Application Architecture
+The development process involved reviewing requirements, planning the application structure, understanding the database-backed analytics approach, troubleshooting errors, and preparing project documentation.
+
+The application also includes optional OpenAI integration for question interpretation when configured. The local interpreter provides an alternative for supported question patterns.
+
+## 3. How AI Was Used During Development
+
+AI assistance supported the following activities:
+
+- Understanding the assignment requirements and breaking them into implementation tasks.
+- Planning the application architecture and separation of responsibilities between the frontend, backend, database, interpreter, and analytics modules.
+- Understanding how to load CSV data into SQLite and calculate business metrics using SQL.
+- Explaining FastAPI endpoints and structured request and response handling.
+- Troubleshooting development and test execution issues.
+- Reviewing the supported analytics questions and documenting data-quality assumptions.
+- Preparing setup instructions, architecture documentation, and this development report.
+
+AI-generated suggestions were reviewed and tested during development. The final implementation should be understood and explained by the developer.
+
+## 4. Application Architecture
+
+The application consists of the following components:
 
 - **Frontend:** HTML, CSS, and JavaScript interface for entering questions and displaying answers.
-- **Backend:** FastAPI receives requests and coordinates question interpretation and analytics.
-- **Question interpreter:** Maps natural-language questions to supported analytics intents.
-- **Database:** SQLite stores the sales data imported from the CSV file.
-- **Analytics:** Predefined database queries calculate revenue, top product, monthly trends, top region, and monthly comparisons.
-- **Tests:** Pytest verifies important analytics and question-handling behavior.
+- **Backend:** FastAPI application that accepts questions and coordinates the processing flow.
+- **Question interpreter:** Maps supported natural-language questions to predefined analytics intents.
+- **Database:** SQLite stores transaction data imported from the supplied CSV.
+- **Analytics:** Predefined database queries calculate revenue, top product, monthly trends, top region, and comparisons between months.
+- **Automated tests:** Pytest checks important analytics and question-handling behavior.
 
-## 4. Supported Questions
+The processing flow is:
 
-The application supports:
-- Total sales revenue
-- Product with the highest revenue
-- Monthly revenue trend
-- Region with the highest revenue
-- Revenue comparison between two months
+Browser interface → FastAPI → Question interpreter → Supported analytics operation → SQL query → SQLite → Structured answer
 
-## 5. Testing and Debugging
+## 5. AI Integration and Responsible Query Handling
 
-Automated tests were executed using:
+The application supports local question interpretation and optional OpenAI-powered intent classification.
 
-`python -m pytest -q`
+The intended role of the optional language model is to help identify a supported analytics intent and its required parameters. Database calculations are performed by predefined analytics queries.
 
-The latest test run completed successfully with **7 passed**.
+The language model is not permitted to supply arbitrary SQL for execution. Restricting execution to predefined analytics operations helps reduce the risk of unsupported queries and destructive database operations.
 
-Manual tests verified the five main analytics features. An initial pytest import issue was resolved by adding `pytest.ini` with the project root in the Python path.
+The system's answers remain limited to the analytics it implements and the data available in the database.
 
-## 6. Error Handling and Reliability
+## 6. Supported Analytics
 
-Unsupported questions return a helpful message listing supported question types. Month comparisons require months in `YYYY-MM` format. Analytics calculations are performed by predefined database queries rather than allowing the language model to generate arbitrary SQL.
+The application supports five main questions:
 
-## 7. Limitations
+1. What is the total revenue?
+2. Which product generated the highest revenue?
+3. What is the monthly revenue trend?
+4. Which region generated the highest sales?
+5. How did revenue change between two months?
 
-The local interpreter supports a limited set of question patterns. More flexible natural-language understanding depends on the optional OpenAI integration. The application currently focuses on the provided sales dataset and predefined analytics.
+The application also provides helpful handling for unsupported questions and month comparisons that do not follow the expected `YYYY-MM` format.
 
-## 8. Future Improvements
+## 7. Testing and Debugging
 
-- Add more natural-language question patterns.
-- Improve the interface with charts and downloadable reports.
-- Add more automated tests for API validation and unusual data.
-- Support additional datasets and analytics.
-- Add stronger logging and deployment configuration.
+Automated tests were run using:
 
-## 9. Responsible AI Use
+```powershell
+python -m pytest -q
+```
 
-AI assistance was used during development, and the implementation was tested locally. The developer should review and understand the source code, verify calculation results, and be able to explain the design decisions before submission.
+The latest recorded test run completed successfully with **7 passed**.
+
+Manual testing was also performed for the five main analytics features through the application interface.
+
+One development issue involved pytest being unable to locate the `database` module. This was addressed by adding a `pytest.ini` configuration that places the project root on the Python path. The tests were then rerun successfully.
+
+The test results apply to the version tested at that time. Tests should be rerun after further code changes.
+
+## 8. Data Quality and Calculation Rules
+
+Revenue is calculated as:
+
+```text
+(quantity * unit_price) - discount_amount
+```
+
+For revenue analytics, the application includes completed transactions with positive quantities and valid, non-missing, non-negative numeric values for unit price and discount.
+
+Returned transactions are excluded from revenue metrics. Records with missing unit prices remain in the database for traceability but are excluded from the revenue calculations.
+
+These rules were selected for the assessment and documented in the project README. In a production application, the treatment of incomplete or inconsistent financial records should be confirmed with the data owner.
+
+## 9. Problems Encountered
+
+The following development challenges were encountered:
+
+- Pytest initially had difficulty locating the database module.
+- The local interpreter did not recognize every possible natural-language phrasing.
+- The application needed clear rules for handling missing prices, returned transactions, and invalid month-comparison inputs.
+- Documentation needed to explain how AI-assisted interpretation could be combined with controlled database operations.
+
+## 10. How the Problems Were Addressed
+
+- Added pytest configuration to make the project root available during test execution.
+- Tested the supported question examples manually through the web interface.
+- Used predefined analytics operations instead of allowing arbitrary model-generated SQL to execute.
+- Documented the revenue formula, data-quality rules, supported questions, and known limitations.
+- Reran the automated tests and recorded the successful test result.
+
+## 11. Known Limitations
+
+- Local question interpretation supports a limited set of patterns.
+- The application focuses on the supplied dataset and five predefined analytics tasks.
+- Additional tests would improve coverage of API validation, unusual data, and edge cases.
+- The current application is a local assessment prototype rather than a production-hardened service.
+- Optional OpenAI interpretation depends on correct configuration and service availability.
+
+The actual fallback behavior when the OpenAI integration is unavailable should be verified against the implementation.
+
+## 12. Future Improvements
+
+With more development time, the following improvements could be considered:
+
+- Expand natural-language question recognition.
+- Add further analytics and support for additional datasets.
+- Add charts and downloadable reports.
+- Increase automated test coverage for API validation and unusual data.
+- Improve logging and configuration management.
+- Prepare the application for secure deployment and production monitoring.
+
+## 13. Responsible AI Use
+
+AI was used as a development aid rather than as a substitute for validating the application.
+
+The implementation should be reviewed and understood by the developer. Calculations should be verified against the database, tests should be rerun after changes, and the developer should be able to explain the architecture, query-handling approach, assumptions, and limitations.
+
+## 14. Conclusion
+
+This project demonstrates an AI-assisted approach to building a small business analytics application. It combines natural-language interpretation with predefined database queries, automated tests, and documented data-quality rules.
+
+The development process highlights the importance of validating AI-assisted code, testing application behavior, controlling database operations, and clearly documenting technical decisions and limitations.
